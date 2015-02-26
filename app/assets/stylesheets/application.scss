@@ -1,0 +1,7 @@
+@import "bootstrap-sprockets";
+@import "bootstrap";
+@import "leaflet";
+@import "leaflet.draw";
+
+#map { height: 380px; }
+.centered { text-align: center; }

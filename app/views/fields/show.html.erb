@@ -1,0 +1,26 @@
+</br>
+<div class="centered">
+  <%= link_to "Edit", edit_field_path, class: "btn btn-default" %>
+  <%= link_to 'Delete', @field, method: :delete, data: { confirm: 'Are you sure?' }, :remote => true, :class => 'btn btn-default field-delete' %>
+</div>
+
+<% content_for :head do %>
+  <%= coffee_script_tag do %>
+    $.ajax
+      dataType: 'text'
+      url: '<%= fields_path %>/<%= @field.id %>.json'
+      success: (data) ->
+        geojson = $.parseJSON(data)
+        L.geoJson(geojson).addTo(map)
+    
+    $('#field-delete').on 'click', (e) ->
+      e.preventDefault()
+      $.ajax
+        url: '<%= fields_path %>/<%= @field.id %>'
+        type: 'DELETE'
+        success: ->  window.location.href = window.location.origin
+        error: -> console.log 'error'
+
+  <% end %>
+<% end %>
+

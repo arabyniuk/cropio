@@ -1,0 +1,22 @@
+<br />
+<div class="centered">
+  <%= link_to "New", new_field_path, class: "btn btn-default", :data => { :no_turbolink => true } %>
+</div>
+
+<% content_for :head do %>
+  <%= coffee_script_tag do %>
+    $.ajax
+      dataType: 'text'
+      url: '<%= fields_path %>.json'
+      success: (data) ->
+        geojson = $.parseJSON(data)
+        L.geoJson(geojson,
+          onEachFeature: onEachFeature
+        ).addTo(map)
+
+      onEachFeature = (feature, layer) ->
+        popupContent = "<a href='<%= request.base_url %>/fields/#{feature.id}'>#{feature.properties.name}</a>"
+        layer.bindPopup(popupContent)
+  <% end %>
+<% end %>
+

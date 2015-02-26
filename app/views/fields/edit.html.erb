@@ -1,0 +1,26 @@
+<% content_for :head do %>
+  <%= coffee_script_tag do %>
+$(document).on 'page:change', ->
+
+  $.ajax
+    dataType: 'text'
+    url: '<%= fields_path %>/<%= @field.id %>.json'
+    success: (data) ->
+      geojson = $.parseJSON(data)
+      s = L.geoJson(geojson,
+        onEachFeature: onEachFeature        
+      ).addTo(map)
+    
+    onEachFeature = (feature, layer) ->
+    
+      layer.on 'click', ->
+        @enableEdit()
+
+      layer.on 'editable:vertex:dragend', (e) ->
+        $.ajax
+          type: 'PUT'
+          url: '<%= fields_path %>/<%= @field.id %>'
+          data: { field: JSON.stringify(@.toGeoJSON()) }
+
+  <% end %>
+<% end %>
