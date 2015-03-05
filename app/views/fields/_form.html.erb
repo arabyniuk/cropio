@@ -1,0 +1,12 @@
+<br>
+<div class="centered">
+<%= form_for(@field , html: { class: "form-inline" }) do |f| %>
+  <div class="form-group">
+    <%= f.label :name %>
+    <%= f.text_field :name, class: "form-control", placeholder: "Name", id: "name" %>
+  </div>
+    <%= f.hidden_field :shape, id: "shape" %>
+    <%= f.submit class: "btn btn-default", id: "save" %>
+<% end %>
+</div>
+<br>

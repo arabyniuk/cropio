@@ -3,11 +3,18 @@
 # You can use CoffeeScript in this file: http://coffeescript.org/
 #
 $(document).on 'page:change', ->
-  window.map = L.map('map',
-   {editable: true}
-  ).setView([35.52086, -5.679523], 6)
-  L.tileLayer('https://{s}.tiles.mapbox.com/v3/{id}/{z}/{x}/{y}.png', {
-    maxZoom: 18,
-    id: 'examples.map-20v6611k'
-  }).addTo(map)
+	
+  window.mapPaneBg = L.tileLayer('https://{s}.tiles.mapbox.com/v3/{id}/{z}/{x}/{y}.png', { maxZoom: 18,id: 'examples.map-20v6611k' })
+
+  window.getShapes = (drawnItems) ->
+    shapes = []
+    drawnItems.eachLayer (layer) ->
+      if layer instanceof L.Polyline
+        shapes.push layer.getLatLngs()
+      if layer instanceof L.Circle
+        shapes.push [ layer.getLatLng() ]
+      if layer instanceof L.Marker
+        shapes.push [ layer.getLatLng() ]
+      return
+    shapes
 

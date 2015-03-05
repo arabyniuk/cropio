@@ -1,3 +1,4 @@
+
 </br>
 <div class="centered">
   <%= link_to "Edit", edit_field_path, class: "btn btn-default" %>
@@ -6,12 +7,20 @@
 
 <% content_for :head do %>
   <%= coffee_script_tag do %>
+    map = L.map('map')
     $.ajax
       dataType: 'text'
       url: '<%= fields_path %>/<%= @field.id %>.json'
       success: (data) ->
-        geojson = $.parseJSON(data)
-        L.geoJson(geojson).addTo(map)
+        dataJson = $.parseJSON(data)
+        geojson =  L.geoJson(dataJson, onEachFeature: (feature, layer) ->
+          popupContent = feature.properties.name
+          layer.bindPopup(popupContent)
+        )
+        
+        map.fitBounds(geojson.getBounds())
+        mapPaneBg.addTo(map)
+        geojson.addTo(map)
     
     $('#field-delete').on 'click', (e) ->
       e.preventDefault()

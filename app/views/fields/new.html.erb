@@ -1,27 +1,22 @@
-<br />
-<div class="centered">
+<%= render 'form' %>
 
-<form class="form-inline">
-  <div class="form-group">
-    <label for="name">Name</label>
-    <input id="name" class="form-control" type="text" placeholder="Name">
-  </div>
-  <button id="save" class="btn btn-default">Save</button>
-</form>
-
-</div>
 <% content_for :head do %>
   <%= coffee_script_tag do %>
   $(document).on 'page:change', ->
-    drawnItems = new L.FeatureGroup();
-    map.addLayer(drawnItems);
+    map = L.map('map').setView([35.52086, -5.679523], 6)
+    mapPaneBg.addTo(map)
 
-    drawControl = new L.Control.Draw({
-      edit: {
+    drawnItems = new L.FeatureGroup()
+    map.addLayer(drawnItems)
+
+    drawControl = new L.Control.Draw
+      edit:
         featureGroup: drawnItems
-        edit: false
-      }
-    });
+
+      draw:
+        marker: false
+        circle: false
+
     map.addControl(drawControl)
 
     map.on 'draw:created', (e) ->
@@ -30,32 +25,12 @@
       shapes = getShapes(drawnItems)
       multiPolygon = new L.MultiPolygon(shapes)
 
-    getShapes = (drawnItems) ->
-      shapes = []
-      drawnItems.eachLayer (layer) ->
-        if layer instanceof L.Polyline
-          shapes.push layer.getLatLngs()
-        if layer instanceof L.Circle
-          shapes.push [ layer.getLatLng() ]
-        if layer instanceof L.Marker
-          shapes.push [ layer.getLatLng() ]
-        return
-      shapes
-
     $('#save').on 'click', (e) ->
       e.preventDefault()
       shapes = getShapes(drawnItems)
       multiPolygon = new L.MultiPolygon(shapes)
-      name = $('#name').val()
-      $.ajax
-        dataType: 'text'
-        type: 'POST'
-        url: '<%= fields_path %>'
-        data: { field: JSON.stringify(multiPolygon.toGeoJSON()), name: name }
-        success: ->
-          window.location.href = window.location.origin
-        error: (e)->
-          console.log "error"
+      $('#shape').val(JSON.stringify(multiPolygon.toGeoJSON()))
+      $('form').submit()
 
   <% end %>
 <% end %>

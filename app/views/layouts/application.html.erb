@@ -9,6 +9,12 @@
 <body>
 <%= render partial: '/shared/header' %>
 
+<% flash.each do |key, value| %>
+<div class="wrap">
+  <div class="alert alert-<%= key %>"><%= value.html_safe %></div>
+</div>
+<% end %>
+
 <div id="map"></div>
 <%= yield %>
 

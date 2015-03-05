@@ -5,3 +5,23 @@
 
 #map { height: 380px; }
 .centered { text-align: center; }
+
+.alert-error {
+  color: #a94442;
+  background-color: #f2dede;
+  border-color: #ebccd1;
+}
+
+.alert-notice {
+  color: #31708f;
+  background-color: #d9edf7;
+  border-color: #bce8f1;
+}
+
+.wrap {
+  margin: 0 15px;
+}
+
+.field_with_errors {
+  display: inline-block;
+}

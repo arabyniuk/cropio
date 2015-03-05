@@ -1,26 +1,53 @@
+<%= render 'form' %>
+
 <% content_for :head do %>
   <%= coffee_script_tag do %>
 $(document).on 'page:change', ->
+
+  map = L.map('map')
+
+  featureGroup = L.featureGroup()
+  map.addLayer(featureGroup)
 
   $.ajax
     dataType: 'text'
     url: '<%= fields_path %>/<%= @field.id %>.json'
     success: (data) ->
-      geojson = $.parseJSON(data)
-      s = L.geoJson(geojson,
+      dataJson = $.parseJSON(data)
+      geojson = L.geoJson(dataJson,
         onEachFeature: onEachFeature        
-      ).addTo(map)
-    
-    onEachFeature = (feature, layer) ->
-    
-      layer.on 'click', ->
-        @enableEdit()
+      )
 
-      layer.on 'editable:vertex:dragend', (e) ->
-        $.ajax
-          type: 'PUT'
-          url: '<%= fields_path %>/<%= @field.id %>'
-          data: { field: JSON.stringify(@.toGeoJSON()) }
+      map.fitBounds(geojson.getBounds())
+      mapPaneBg.addTo(map)
+      geojson.addTo(map)
+
+    onEachFeature = (feature, layer) ->
+
+      layer.eachLayer (e) ->
+        e.addTo(featureGroup)
+
+  drawControl = new L.Control.Draw
+    edit:
+      featureGroup: featureGroup
+
+    draw:
+      marker: false
+      circle: false
+
+  map.addControl(drawControl)
+
+  map.on 'draw:created', (e) ->
+    featureGroup.addLayer e.layer
+    @
+
+  $('#save').on 'click', (e) ->
+    e.preventDefault()
+    shapes = getShapes(featureGroup)
+    multiPolygon = new L.MultiPolygon(shapes)
+    $('#shape').val(JSON.stringify(multiPolygon.toGeoJSON()))
+    $('form').submit()
+
 
   <% end %>
 <% end %>

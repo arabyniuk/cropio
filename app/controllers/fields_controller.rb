@@ -27,13 +27,15 @@ class FieldsController < ApplicationController
   end
 
   def create
-    params[:field] = JSON.parse params[:field] if params[:page].is_a? String
-    shape = RGeo::GeoJSON.decode(params[:field], json_parser: :json)
-    @field = Field.new(name: params[:name], shape: shape.geometry.as_text)
-    respond_to do |format|
-      if @field.save
-        format.json { head :ok }
-      end
+    state = get_state(params[:field][:shape])
+    shape = RGeo::GeoJSON.decode(params[:field][:shape], json_parser: :json)
+
+    @field = Field.new(name: params[:field][:name], shape: shape.geometry.as_text, state: state)
+    if @field.save
+      redirect_to @field, notice: 'Field was successfully created.'
+    else
+      flash[:error] = @field.errors.full_messages.map { |m| "<span>"+ m + "</span>" }.join("<br>")
+      render :new
     end
 
   end
@@ -43,13 +45,15 @@ class FieldsController < ApplicationController
   end
 
   def update
-    params[:field] = JSON.parse params[:field] if params[:page].is_a? String
-    shape = RGeo::GeoJSON.decode(params[:field], json_parser: :json)
+    state = get_state(params[:field][:shape])
+    shape = RGeo::GeoJSON.decode(params[:field][:shape], json_parser: :json)
+
     @field = Field.find(params[:id])
-    respond_to do |format|
-      if @field.update(shape: shape.geometry.as_text)
-        format.json { head :ok }
-      end
+    if @field.update(name: params[:field][:name], shape: shape.geometry.as_text, state: state)
+      redirect_to @field, notice: 'Field was successfully updated.'
+    else
+      flash[:error] = @field.errors.full_messages.map { |m| "<span>"+ m + "</span>" }.join("<br>")
+      render :edit
     end
   end 
 
@@ -63,4 +67,11 @@ class FieldsController < ApplicationController
     end
   end
 
+  private
+
+  def get_state(shape)
+    state = (ActiveRecord::Base.connection.execute "SELECT ST_IsValid(ST_GeomFromText(ST_AsText(ST_GeomFromGeoJSON('#{((JSON.parse shape)["geometry"]).to_json}'))))").getvalue(0, 0)
+    if state == "t" then state = true else state = false end
+    state
+  end
 end

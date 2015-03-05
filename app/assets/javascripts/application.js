@@ -15,5 +15,4 @@
 //= require turbolinks
 //= require leaflet
 //= require leaflet.draw
-//= require Leaflet.Editable
 //= require_tree .
